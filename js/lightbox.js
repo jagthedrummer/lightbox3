@@ -155,7 +155,9 @@ Lightbox.prototype = {
         //  <div id="lightbox">
         //      <div id="outerContentContainer">
         //          <div id="contentContainer">
-        //              <img id="lightboxImage">
+		//              <div id="lbContent">
+        //                  <img id="lightboxImage">
+		//              </div>
         //              <div style="" id="hoverNav">
         //                  <a href="#" id="prevLink"></a>
         //                  <a href="#" id="nextLink"></a>
@@ -191,7 +193,9 @@ Lightbox.prototype = {
         objBody.appendChild(Builder.node('div',{id:'lightbox'}, [
             Builder.node('div',{id:'outerContentContainer'}, 
                 Builder.node('div',{id:'contentContainer'}, [
-                    Builder.node('img',{id:'lightboxImage'}), 
+					Builder.node('div',{id:'lbContent'}, [
+						Builder.node('img',{id:'lightboxImage'})
+					]), 
                     Builder.node('div',{id:'hoverNav'}, [
                         Builder.node('a',{id:'prevLink', href: '#' }),
                         Builder.node('a',{id:'nextLink', href: '#' })
@@ -403,7 +407,9 @@ Lightbox.prototype = {
         // if caption is not null
         if (this.contentArray[this.activeImage][1] != ""){
             this.caption.update(this.contentArray[this.activeImage][1]).show();
-        }
+        }else{
+			this.caption.update("").hide();
+		}
 		
 		// if description is not null
         if (this.contentArray[this.activeImage][2] != ""){
