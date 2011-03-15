@@ -33,7 +33,7 @@
     - updateImageList()
     - start()
     - changeImage()
-    - resizeImageContainer()
+    - resizeContentContainer()
     - showImage()
     - updateDetails()
     - updateNav()
@@ -153,8 +153,8 @@ Lightbox.prototype = {
         //
         //  <div id="overlay"></div>
         //  <div id="lightbox">
-        //      <div id="outerImageContainer">
-        //          <div id="imageContainer">
+        //      <div id="outerContentContainer">
+        //          <div id="contentContainer">
         //              <img id="lightboxImage">
         //              <div style="" id="hoverNav">
         //                  <a href="#" id="prevLink"></a>
@@ -189,8 +189,8 @@ Lightbox.prototype = {
 		objBody.appendChild(Builder.node('div',{id:'overlay'}));
 	
         objBody.appendChild(Builder.node('div',{id:'lightbox'}, [
-            Builder.node('div',{id:'outerImageContainer'}, 
-                Builder.node('div',{id:'imageContainer'}, [
+            Builder.node('div',{id:'outerContentContainer'}, 
+                Builder.node('div',{id:'contentContainer'}, [
                     Builder.node('img',{id:'lightboxImage'}), 
                     Builder.node('div',{id:'hoverNav'}, [
                         Builder.node('a',{id:'prevLink', href: '#' }),
@@ -222,7 +222,7 @@ Lightbox.prototype = {
 
 		$('overlay').hide().observe('click', (function() { this.end(); }).bind(this));
 		$('lightbox').hide().observe('click', (function(event) { if (event.element().id == 'lightbox') this.end(); }).bind(this));
-		$('outerImageContainer').setStyle({ width: size, height: size });
+		$('outerContentContainer').setStyle({ width: size, height: size });
 		$('prevLink').observe('click', (function(event) { event.stop(); this.changeImage(this.activeImage - 1); }).bindAsEventListener(this));
 		$('nextLink').observe('click', (function(event) { event.stop(); this.changeImage(this.activeImage + 1); }).bindAsEventListener(this));
 		$('loadingLink').observe('click', (function(event) { event.stop(); this.end(); }).bind(this));
@@ -231,7 +231,7 @@ Lightbox.prototype = {
         var th = this;
         (function(){
             var ids = 
-                'overlay lightbox outerImageContainer imageContainer lightboxImage hoverNav prevLink nextLink loading loadingLink ' + 
+                'overlay lightbox outerContentContainer contentContainer lightboxImage hoverNav prevLink nextLink loading loadingLink ' + 
                 'imageDataContainer imageData imageDetails caption numberDisplay description bottomNav bottomNavClose';   
             $w(ids).each(function(id){ th[id] = $(id); });
         }).defer();
@@ -318,19 +318,19 @@ Lightbox.prototype = {
 
         imgPreloader.onload = (function(){
             this.lightboxImage.src = this.contentArray[this.activeImage][0];
-            this.resizeImageContainer(imgPreloader.width, imgPreloader.height);
+            this.resizeContentContainer(imgPreloader.width, imgPreloader.height);
         }).bind(this);
         imgPreloader.src = this.contentArray[this.activeImage][0];
     },
 
     //
-    //  resizeImageContainer()
+    //  resizeContentContainer()
     //
-    resizeImageContainer: function(imgWidth, imgHeight) {
+    resizeContentContainer: function(imgWidth, imgHeight) {
 
         // get current width and height
-        var widthCurrent  = this.outerImageContainer.getWidth();
-        var heightCurrent = this.outerImageContainer.getHeight();
+        var widthCurrent  = this.outerContentContainer.getWidth();
+        var heightCurrent = this.outerContentContainer.getHeight();
 
         // get new width and height
         var widthNew  = (imgWidth  + LightboxOptions.borderSize * 2);
@@ -344,16 +344,16 @@ Lightbox.prototype = {
         var wDiff = widthCurrent - widthNew;
         var hDiff = heightCurrent - heightNew;
 
-        //if (hDiff != 0) new Effect.Scale(this.outerImageContainer, yScale, {scaleX: false, duration: this.resizeDuration, queue: 'front'}); 
-        //if (wDiff != 0) new Effect.Scale(this.outerImageContainer, xScale, {scaleY: false, duration: this.resizeDuration, delay: this.resizeDuration}); 
+        //if (hDiff != 0) new Effect.Scale(this.outerContentContainer, yScale, {scaleX: false, duration: this.resizeDuration, queue: 'front'}); 
+        //if (wDiff != 0) new Effect.Scale(this.outerContentContainer, xScale, {scaleY: false, duration: this.resizeDuration, delay: this.resizeDuration}); 
 
 		if( (hDiff != 0) && (wDiff != 0) ){
 			
-			new Effect.Morph(this.outerImageContainer,{
+			new Effect.Morph(this.outerContentContainer,{
 				style : { 'width' : widthNew + "px", 'height' : heightNew + "px"},
 				duration: this.resizeDuration
 			});
-			/*new Effect.Scale(this.outerImageContainer, 100, {
+			/*new Effect.Scale(this.outerContentContainer, 100, {
 				scaleMode: {
 					originalHeight: heightNew,
 					originalWidth: widthNew
