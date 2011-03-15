@@ -68,7 +68,54 @@ LightboxOptions = Object.extend({
 	labelImage: "Image",
 	labelOf: "of",
 	defaultWidth : 250,  //the width used when we don't know what size the lightbox should be
-	defaultHeight : 250  //the height used when we don't know what size the lightbox should be
+	defaultHeight : 250,  //the height used when we don't know what size the lightbox should be
+	fileTypes : {
+		page : ['asp', 'aspx', 'cgi', 'cfm', 'htm', 'html', 'pl', 'php4', 'php3', 'php', 'php5', 'phtml', 'rhtml', 'shtml', 'txt', 'vbs', 'rb'],
+		media : ['aif', 'aiff', 'asf', 'avi', 'divx', 'm1v', 'm2a', 'm2v', 'm3u', 'mid', 'midi', 'mov', 'moov', 'movie', 'mp2', 'mp3', 'mpa', 'mpa', 'mpe', 'mpeg', 'mpg', 'mpg', 'mpga', 'pps', 'qt', 'rm', 'ram', 'swf', 'viv', 'vivo', 'wav'],
+		image : ['bmp', 'gif', 'jpeg', 'jpg', 'png', 'tiff','tif']
+	},
+	mimeTypes : {
+		avi : 'video/avi',
+		aif : 'audio/aiff',
+		aiff : 'audio/aiff',
+		gif : 'image/gif',
+		bmp : 'image/bmp',
+		jpeg : 'image/jpeg',
+		jpg : 'image/jpeg',
+		m1v : 'video/mpeg',
+		m2a : 'audio/mpeg',
+		m2v : 'video/mpeg',
+		m3u : 'audio/x-mpequrl',
+		mid : 'audio/x-midi',
+		midi : 'audio/x-midi',
+		mjpg : 'video/x-motion-jpeg',
+		moov : 'video/quicktime',
+		mov : 'video/quicktime',
+		movie : 'video/x-sgi-movie',
+		mp2 : 'audio/mpeg',
+		mp3 : 'audio/mpeg3',
+		mpa : 'audio/mpeg',
+		mpa : 'video/mpeg',
+		mpe : 'video/mpeg',
+		mpeg : 'video/mpeg',
+		mpg : 'audio/mpeg',
+		mpg : 'video/mpeg',
+		mpga : 'audio/mpeg',
+		pdf : 'application/pdf',
+		png : 'image/png',
+		pps : 'application/mspowerpoint',
+		qt : 'video/quicktime',
+		ram : 'audio/x-pn-realaudio-plugin',
+		rm : 'application/vnd.rn-realmedia',
+		swf	: 'application/x-shockwave-flash',
+		tiff : 'image/tiff',
+		tif : 'image/tiff',
+		viv : 'video/vivo',
+		vivo : 'video/vivo',
+		wav : 'audio/wav',
+		wmv : 'application/x-mplayer2'			
+	}	
+
 }, window.LightboxOptions || {});
 
 // -----------------------------------------------------------------------------------
@@ -76,7 +123,7 @@ LightboxOptions = Object.extend({
 var Lightbox = Class.create();
 
 Lightbox.prototype = {
-    imageArray: [],
+    contentArray: [],
     activeImage: undefined,
     
     // initialize()
@@ -209,7 +256,7 @@ Lightbox.prototype = {
     
     //
     //  start()
-    //  Display overlay and lightbox. If image is part of a set, add siblings to imageArray.
+    //  Display overlay and lightbox. If image is part of a set, add siblings to contentArray.
     //
     start: function(imageLink) {    
 
@@ -221,20 +268,20 @@ Lightbox.prototype = {
 
         new Effect.Appear(this.overlay, { duration: this.overlayDuration, from: 0.0, to: LightboxOptions.overlayOpacity });
 
-        this.imageArray = [];
+        this.contentArray = [];
         var imageNum = 0;       
 
         if ((imageLink.rel == 'lightbox')){
-            // if image is NOT part of a set, add single image to imageArray
-            this.imageArray.push([imageLink.href, imageLink.title, imageLink.getAttribute('description') ]);         
+            // if image is NOT part of a set, add single image to contentArray
+            this.contentArray.push([imageLink.href, imageLink.title, imageLink.getAttribute('description') ]);         
         } else {
             // if image is part of a set..
-            this.imageArray = 
+            this.contentArray = 
                 $$(imageLink.tagName + '[href][rel="' + imageLink.rel + '"]').
                 collect(function(anchor){ return [anchor.href, anchor.title, anchor.getAttribute('description') ]; }).
                 uniq();
             
-            while (this.imageArray[imageNum][0] != imageLink.href) { imageNum++; }
+            while (this.contentArray[imageNum][0] != imageLink.href) { imageNum++; }
         }
 
         // calculate top and left offset for the lightbox 
@@ -270,10 +317,10 @@ Lightbox.prototype = {
 
 
         imgPreloader.onload = (function(){
-            this.lightboxImage.src = this.imageArray[this.activeImage][0];
+            this.lightboxImage.src = this.contentArray[this.activeImage][0];
             this.resizeImageContainer(imgPreloader.width, imgPreloader.height);
         }).bind(this);
-        imgPreloader.src = this.imageArray[this.activeImage][0];
+        imgPreloader.src = this.contentArray[this.activeImage][0];
     },
 
     //
@@ -354,18 +401,18 @@ Lightbox.prototype = {
     updateDetails: function() {
     
         // if caption is not null
-        if (this.imageArray[this.activeImage][1] != ""){
-            this.caption.update(this.imageArray[this.activeImage][1]).show();
+        if (this.contentArray[this.activeImage][1] != ""){
+            this.caption.update(this.contentArray[this.activeImage][1]).show();
         }
 		
 		// if description is not null
-        if (this.imageArray[this.activeImage][2] != ""){
-            this.description.update(this.imageArray[this.activeImage][2]).show();
+        if (this.contentArray[this.activeImage][2] != ""){
+            this.description.update(this.contentArray[this.activeImage][2]).show();
         }
         
         // if image is part of set display 'Image x of x' 
-        if (this.imageArray.length > 1){
-            this.numberDisplay.update( LightboxOptions.labelImage + ' ' + (this.activeImage + 1) + ' ' + LightboxOptions.labelOf + '  ' + this.imageArray.length).show();
+        if (this.contentArray.length > 1){
+            this.numberDisplay.update( LightboxOptions.labelImage + ' ' + (this.activeImage + 1) + ' ' + LightboxOptions.labelOf + '  ' + this.contentArray.length).show();
         }
 
         new Effect.Parallel(
@@ -397,7 +444,7 @@ Lightbox.prototype = {
         if (this.activeImage > 0) this.prevLink.show();
 
         // if not last image in set, display next image button
-        if (this.activeImage < (this.imageArray.length - 1)) this.nextLink.show();
+        if (this.activeImage < (this.contentArray.length - 1)) this.nextLink.show();
         
         this.enableKeyboardNav();
     },
@@ -439,7 +486,7 @@ Lightbox.prototype = {
                 this.changeImage(this.activeImage - 1);
             }
         } else if ((key == 'n') || (keycode == 39)){ // display next image
-            if (this.activeImage != (this.imageArray.length - 1)){
+            if (this.activeImage != (this.contentArray.length - 1)){
                 this.disableKeyboardNav();
                 this.changeImage(this.activeImage + 1);
             }
@@ -452,13 +499,13 @@ Lightbox.prototype = {
     //
     preloadNeighborImages: function(){
         var preloadNextImage, preloadPrevImage;
-        if (this.imageArray.length > this.activeImage + 1){
+        if (this.contentArray.length > this.activeImage + 1){
             preloadNextImage = new Image();
-            preloadNextImage.src = this.imageArray[this.activeImage + 1][0];
+            preloadNextImage.src = this.contentArray[this.activeImage + 1][0];
         }
         if (this.activeImage > 0){
             preloadPrevImage = new Image();
-            preloadPrevImage.src = this.imageArray[this.activeImage - 1][0];
+            preloadPrevImage.src = this.contentArray[this.activeImage - 1][0];
         }
     
     },
