@@ -293,12 +293,12 @@ Lightbox.prototype = {
 
         if ((imageLink.rel == 'lightbox')){
             // if image is NOT part of a set, add single image to contentArray
-            this.contentArray.push([imageLink.href, imageLink.title, imageLink.getAttribute('description') ]);         
+            this.contentArray.push([imageLink.href, imageLink.title, imageLink.getAttribute('description'), this.parseParams(imageLink.getAttribute('params')) ]);         
         } else {
             // if image is part of a set..
             this.contentArray = 
                 $$(imageLink.tagName + '[href][rel="' + imageLink.rel + '"]').
-                collect(function(anchor){ return [anchor.href, anchor.title, anchor.getAttribute('description') ]; }).
+                collect(function(anchor){ return [anchor.href, anchor.title, anchor.getAttribute('description'), this.parseParams(anchor.getAttribute('params')) ]; }.bind(this)).
                 uniq();
             
             while (this.contentArray[imageNum][0] != imageLink.href) { imageNum++; }
@@ -312,6 +312,19 @@ Lightbox.prototype = {
         
         this.changeContent(imageNum);
     },
+
+	//
+	//  parse the params attribute of a link
+	parseParams : function(params){
+		if(params == null) return {}
+		var paramHash = {};
+		var parameterArray = params.split(',');
+		parameterArray.each(function(pair){
+			pair = pair.split('=')
+			paramHash[pair[0]] = pair[1]
+		});
+		return paramHash;
+	},
 
 
 	changeContent : function(linkNum){
@@ -338,8 +351,8 @@ Lightbox.prototype = {
 		console.log(this.getAnchor(this.contentArray[imageNum][0]));
 		console.log( $(this.getAnchor(this.contentArray[imageNum][0])) );
 		this.lightboxTemp.innerHTML = $(this.getAnchor(this.contentArray[imageNum][0])).innerHTML;
-		var w = this.lightboxTemp.getWidth();//+(this.options.contentOffset.height);
-		var h = this.lightboxTemp.getHeight();//+(this.options.contentOffset.width);
+		var w = parseInt(this.contentArray[imageNum][3]['lightbox_width']) || this.lightboxTemp.getWidth();//+(this.options.contentOffset.height);
+		var h = parseInt(this.contentArray[imageNum][3]['lightbox_height']) || this.lightboxTemp.getHeight();//+(this.options.contentOffset.width);
 		this.lightboxContent.innerHTML =  this.lightboxTemp.innerHTML;
 		this.resizeContentContainer( w,h );
 	},
@@ -359,8 +372,8 @@ Lightbox.prototype = {
 						this.lightboxTemp.innerHTML = response.responseText;
 						//var layout =  this.lightboxContent.getLayout();
 						//layout.get('width'),layout.get('height') 
-						var w = this.lightboxTemp.getWidth();//+(this.options.contentOffset.height);
-						var h = this.lightboxTemp.getHeight();//+(this.options.contentOffset.width);
+						var w = parseInt(this.contentArray[imageNum][3]['lightbox_width']) || this.lightboxTemp.getWidth();//+(this.options.contentOffset.height);
+						var h = parseInt(this.contentArray[imageNum][3]['lightbox_height']) || this.lightboxTemp.getHeight();//+(this.options.contentOffset.width);
 						this.lightboxContent.innerHTML =  response.responseText;
 						this.resizeContentContainer( w,h );
 						//this._processWindow();
@@ -409,6 +422,7 @@ Lightbox.prototype = {
     //  resizeContentContainer()
     //
     resizeContentContainer: function(imgWidth, imgHeight) {
+		console.log(imgWidth + " X " + imgHeight)
 
         // get current width and height
         var widthCurrent  = this.outerContentContainer.getWidth();
@@ -425,7 +439,7 @@ Lightbox.prototype = {
         // calculate size difference between new and old image, and resize if necessary
         var wDiff = widthCurrent - widthNew;
         var hDiff = heightCurrent - heightNew;
-
+		console.log(widthNew + " X " + heightNew)
         //if (hDiff != 0) new Effect.Scale(this.outerContentContainer, yScale, {scaleX: false, duration: this.resizeDuration, queue: 'front'}); 
         //if (wDiff != 0) new Effect.Scale(this.outerContentContainer, xScale, {scaleY: false, duration: this.resizeDuration, delay: this.resizeDuration}); 
 
