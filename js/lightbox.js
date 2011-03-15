@@ -408,18 +408,20 @@ Lightbox.prototype = {
         if (this.contentArray[this.activeImage][1] != ""){
             this.caption.update(this.contentArray[this.activeImage][1]).show();
         }else{
-			this.caption.update("").hide();
+			this.caption.update("");
 		}
 		
 		// if description is not null
         if (this.contentArray[this.activeImage][2] != ""){
             this.description.update(this.contentArray[this.activeImage][2]).show();
         }
+		
         
         // if image is part of set display 'Image x of x' 
         if (this.contentArray.length > 1){
             this.numberDisplay.update( LightboxOptions.labelImage + ' ' + (this.activeImage + 1) + ' ' + LightboxOptions.labelOf + '  ' + this.contentArray.length).show();
         }
+		
 
         new Effect.Parallel(
             [ 
