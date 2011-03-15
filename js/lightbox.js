@@ -1,5 +1,12 @@
 // -----------------------------------------------------------------------------------
 //
+//	Lightbox v3.0
+//	by Jeremy Green
+//	Last Modification: 3/15/11
+//
+// -----------------------------------------------------------------------------------
+//
+//  Based on:
 //	Lightbox v2.04
 //	by Lokesh Dhakar - http://www.lokeshdhakar.com
 //	Last Modification: 2/9/08
@@ -59,7 +66,9 @@ LightboxOptions = Object.extend({
 	// When grouping images this is used to write: Image # of #.
 	// Change it for non-english localization
 	labelImage: "Image",
-	labelOf: "of"
+	labelOf: "of",
+	defaultWidth : 250,  //the width used when we don't know what size the lightbox should be
+	defaultHeight : 250  //the height used when we don't know what size the lightbox should be
 }, window.LightboxOptions || {});
 
 // -----------------------------------------------------------------------------------
@@ -115,6 +124,7 @@ Lightbox.prototype = {
         //          <div id="imageData">
         //              <div id="imageDetails">
         //                  <span id="caption"></span>
+		//					<span id="description"></span>
         //                  <span id="numberDisplay"></span>
         //              </div>
         //              <div id="bottomNav">
@@ -150,7 +160,8 @@ Lightbox.prototype = {
                 Builder.node('div',{id:'imageData'}, [
                     Builder.node('div',{id:'imageDetails'}, [
                         Builder.node('span',{id:'caption'}),
-                        Builder.node('span',{id:'numberDisplay'})
+                        Builder.node('span',{id:'numberDisplay'}),
+						Builder.node('span',{id:'description'})
                     ]),
                     Builder.node('div',{id:'bottomNav'},
                         Builder.node('a',{id:'bottomNavClose', href: '#' },
@@ -174,7 +185,7 @@ Lightbox.prototype = {
         (function(){
             var ids = 
                 'overlay lightbox outerImageContainer imageContainer lightboxImage hoverNav prevLink nextLink loading loadingLink ' + 
-                'imageDataContainer imageData imageDetails caption numberDisplay bottomNav bottomNavClose';   
+                'imageDataContainer imageData imageDetails caption numberDisplay description bottomNav bottomNavClose';   
             $w(ids).each(function(id){ th[id] = $(id); });
         }).defer();
     },
@@ -215,12 +226,12 @@ Lightbox.prototype = {
 
         if ((imageLink.rel == 'lightbox')){
             // if image is NOT part of a set, add single image to imageArray
-            this.imageArray.push([imageLink.href, imageLink.title]);         
+            this.imageArray.push([imageLink.href, imageLink.title, imageLink.getAttribute('description') ]);         
         } else {
             // if image is part of a set..
             this.imageArray = 
                 $$(imageLink.tagName + '[href][rel="' + imageLink.rel + '"]').
-                collect(function(anchor){ return [anchor.href, anchor.title]; }).
+                collect(function(anchor){ return [anchor.href, anchor.title, anchor.getAttribute('description') ]; }).
                 uniq();
             
             while (this.imageArray[imageNum][0] != imageLink.href) { imageNum++; }
@@ -286,8 +297,24 @@ Lightbox.prototype = {
         var wDiff = widthCurrent - widthNew;
         var hDiff = heightCurrent - heightNew;
 
-        if (hDiff != 0) new Effect.Scale(this.outerImageContainer, yScale, {scaleX: false, duration: this.resizeDuration, queue: 'front'}); 
-        if (wDiff != 0) new Effect.Scale(this.outerImageContainer, xScale, {scaleY: false, duration: this.resizeDuration, delay: this.resizeDuration}); 
+        //if (hDiff != 0) new Effect.Scale(this.outerImageContainer, yScale, {scaleX: false, duration: this.resizeDuration, queue: 'front'}); 
+        //if (wDiff != 0) new Effect.Scale(this.outerImageContainer, xScale, {scaleY: false, duration: this.resizeDuration, delay: this.resizeDuration}); 
+
+		if( (hDiff != 0) && (wDiff != 0) ){
+			
+			new Effect.Morph(this.outerImageContainer,{
+				style : { 'width' : widthNew + "px", 'height' : heightNew + "px"},
+				duration: this.resizeDuration
+			});
+			/*new Effect.Scale(this.outerImageContainer, 100, {
+				scaleMode: {
+					originalHeight: heightNew,
+					originalWidth: widthNew
+				},
+				duration: this.resizeDuration,
+				queue: 'front'
+			});*/
+		}
 
         // if new and old image are same size and no scaling transition is necessary, 
         // do a quick pause to prevent image flicker.
@@ -329,6 +356,11 @@ Lightbox.prototype = {
         // if caption is not null
         if (this.imageArray[this.activeImage][1] != ""){
             this.caption.update(this.imageArray[this.activeImage][1]).show();
+        }
+		
+		// if description is not null
+        if (this.imageArray[this.activeImage][2] != ""){
+            this.description.update(this.imageArray[this.activeImage][2]).show();
         }
         
         // if image is part of set display 'Image x of x' 

@@ -3,7 +3,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
 	
-	<title>Lightbox JS v2.0 | Test Page</title>
+	<title>Lightbox JS v3.0 | Test Page</title>
+
+	<script type="text/javascript">
+		// Set your specific lightbox options here
+		window.LightboxOptions = {overlayOpacity: 0.75};
+	</script>
 
 	<link rel="stylesheet" href="css/lightbox.css" type="text/css" media="screen" />
 	
@@ -19,13 +24,20 @@
 <body>
 
 
-<h1><a href="http://www.lokeshdhakar.com/projects/lightbox2/">Lightbox JS <em>v2.04</em></a></h1>
+<h1><a href="#">Lightbox JS <em>v3.0</em></a></h1>
+<p><a href="#">by Jeremy Green</a></p>
+
+
+<h3>Based on <a href="http://www.lokeshdhakar.com/projects/lightbox2/">Lightbox JS <em>v2.04</em></a></h3>
 <p><a href="http://www.lokeshdhakar.com">by Lokesh Dhakar</a></p>
+
+<hr/>
 
 <h2>Example</h2>
 
 <a href="images/image-1.jpg" rel="lightbox"><img src="images/thumb-1.jpg" width="100" height="40" alt="" /></a>
 
+<a href="images/image-2.jpg" rel="lightbox"><img src="images/thumb-2.jpg" width="100" height="40" alt="" /></a>
 
 
 
@@ -57,6 +69,17 @@
 </code></pre>
 No limits to the number of image sets per page or how many images are allowed in each set. Go nuts!</li>
 </ol>	
+
+<h2>Linked Galleries</h2>
+<a href="images/image-1.jpg" rel="lightbox[gallery]" title="Leaves" description="Here is description info.  Here is description info.  Here is description info.  Here is description info.  Here is description info.  Here is description info.  Here is description info.  Here is description info.  Here is description info.  Here is description info.  Here is description info.  Here is description info.  "><img src="images/thumb-1.jpg" width="100" height="40" alt="Leaves" /></a>
+
+<a href="images/image-2.jpg" rel="lightbox[gallery]" title="Kubota Garden" description="Another description"><img src="images/thumb-2.jpg" width="100" height="40" alt="Kubota Garden" /></a>
+
+
+<h2>Links to external content</h2>
+
+
+<a href="index.html" rel="lightbox[gallery]" title="Kubota Garden"><img src="images/thumb-2.jpg" width="100" height="40" alt="Kubota Garden" /></a>
 
 
 </body>
