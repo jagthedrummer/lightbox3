@@ -22,6 +22,12 @@
 //  		Artemy Tregubenko (arty.name) for cleanup and help in updating to latest ver of proto-aculous.
 //
 // -----------------------------------------------------------------------------------
+// 
+//  Some code and concepts borrowed from lightwindow from stickmanlabs
+//  
+//  http://www.p51labs.com/lightwindow/
+//  
+// -----------------------------------------------------------------------------------
 /*
 
     Table of Contents
@@ -124,7 +130,7 @@ var Lightbox = Class.create();
 
 Lightbox.prototype = {
     contentArray: [],
-    activeImage: undefined,
+    activeContent: undefined,
     
     // initialize()
     // Constructor runs on completion of the DOM loading. Calls updateImageList and then
@@ -155,9 +161,10 @@ Lightbox.prototype = {
         //  <div id="lightbox">
         //      <div id="outerContentContainer">
         //          <div id="contentContainer">
-		//              <div id="lbContent">
-        //                  <img id="lightboxImage">
+		//              <div id="lightboxContent">
+        //                  
 		//              </div>
+		//				<img id="lightboxImage"/>
         //              <div style="" id="hoverNav">
         //                  <a href="#" id="prevLink"></a>
         //                  <a href="#" id="nextLink"></a>
@@ -193,15 +200,14 @@ Lightbox.prototype = {
         objBody.appendChild(Builder.node('div',{id:'lightbox'}, [
             Builder.node('div',{id:'outerContentContainer'}, 
                 Builder.node('div',{id:'contentContainer'}, [
-					Builder.node('div',{id:'lbContent'}, [
-						Builder.node('img',{id:'lightboxImage'})
-					]), 
+					Builder.node('div',{id:'lightboxContent'}, []), 
+					Builder.node('img',{id:'lightboxImage'}),
                     Builder.node('div',{id:'hoverNav'}, [
-                        Builder.node('a',{id:'prevLink', href: '#' }),
-                        Builder.node('a',{id:'nextLink', href: '#' })
+                        Builder.node('a',{id:'prevLink', href: '#', 'class':'lb' }),
+                        Builder.node('a',{ id:'nextLink', href: '#', 'class':'lb' })
                     ]),
                     Builder.node('div',{id:'loading'}, 
-                        Builder.node('a',{id:'loadingLink', href: '#' }, 
+                        Builder.node('a',{id:'loadingLink', href: '#', 'class':'lb' }, 
                             Builder.node('img', {src: LightboxOptions.fileLoadingImage})
                         )
                     )
@@ -215,28 +221,29 @@ Lightbox.prototype = {
 						Builder.node('span',{id:'description'})
                     ]),
                     Builder.node('div',{id:'bottomNav'},
-                        Builder.node('a',{id:'bottomNavClose', href: '#' },
+                        Builder.node('a',{id:'bottomNavClose', href: '#' , 'class':'lb' },
                             Builder.node('img', { src: LightboxOptions.fileBottomNavCloseImage })
                         )
                     )
                 ])
             )
         ]));
+		objBody.appendChild(Builder.node('div',{id:'lightboxTemp'}));
 
 
 		$('overlay').hide().observe('click', (function() { this.end(); }).bind(this));
 		$('lightbox').hide().observe('click', (function(event) { if (event.element().id == 'lightbox') this.end(); }).bind(this));
 		$('outerContentContainer').setStyle({ width: size, height: size });
-		$('prevLink').observe('click', (function(event) { event.stop(); this.changeImage(this.activeImage - 1); }).bindAsEventListener(this));
-		$('nextLink').observe('click', (function(event) { event.stop(); this.changeImage(this.activeImage + 1); }).bindAsEventListener(this));
+		$('prevLink').observe('click', (function(event) { event.stop(); this.changeContent(this.activeContent - 1); }).bindAsEventListener(this));
+		$('nextLink').observe('click', (function(event) { event.stop(); this.changeContent(this.activeContent + 1); }).bindAsEventListener(this));
 		$('loadingLink').observe('click', (function(event) { event.stop(); this.end(); }).bind(this));
 		$('bottomNavClose').observe('click', (function(event) { event.stop(); this.end(); }).bind(this));
 
         var th = this;
         (function(){
             var ids = 
-                'overlay lightbox outerContentContainer contentContainer lightboxImage hoverNav prevLink nextLink loading loadingLink ' + 
-                'imageDataContainer imageData imageDetails caption numberDisplay description bottomNav bottomNavClose';   
+                'overlay lightbox outerContentContainer contentContainer lightboxContent lightboxImage hoverNav prevLink nextLink loading loadingLink ' + 
+                'imageDataContainer imageData imageDetails caption numberDisplay description bottomNav bottomNavClose lightboxTemp';   
             $w(ids).each(function(id){ th[id] = $(id); });
         }).defer();
     },
@@ -256,6 +263,15 @@ Lightbox.prototype = {
                 this.start(target);
             }
         }).bind(this));
+		
+		//Now hide any inline content that will be handled by the lightbox
+		var inlines = $$('a[rel^=lightbox][href^=#]');
+		inlines.each(function(link){
+			console.log(link.href)
+			if(this.fileType(link.href) == "inline"){
+				$(this.getAnchor(link.href)).hide();
+			}
+		}.bind(this));
     },
     
     //
@@ -263,9 +279,9 @@ Lightbox.prototype = {
     //  Display overlay and lightbox. If image is part of a set, add siblings to contentArray.
     //
     start: function(imageLink) {    
-
-        $$('select', 'object', 'embed').each(function(node){ node.style.visibility = 'hidden' });
-
+        
+		this.hideProblemElements();
+		
         // stretch overlay to fill page and fade in
         var arrayPageSize = this.getPageSize();
         $('overlay').setStyle({ width: arrayPageSize[0] + 'px', height: arrayPageSize[1] + 'px' });
@@ -294,38 +310,100 @@ Lightbox.prototype = {
         var lightboxLeft = arrayPageScroll[0];
         this.lightbox.setStyle({ top: lightboxTop + 'px', left: lightboxLeft + 'px' }).show();
         
-        this.changeImage(imageNum);
+        this.changeContent(imageNum);
     },
 
+
+	changeContent : function(linkNum){
+		this.activeContent = linkNum; // update global var
+		this.hideControls();
+		
+		var url = this.contentArray[linkNum][0];
+		if(this.fileType(url) == "image"){
+			this.changeImage(linkNum);
+		}else if(this.fileType(url) == "page"){
+			this.changePage(linkNum);
+	    }else if(this.fileType(url) == "inline"){
+			this.changeInline(linkNum);
+		}else{
+			alert("We can't handle this url : " + url);
+		}
+	},
+
+	//
+	//  changeInline()
+	//  Hide most elements and load content from an inline element
+	//  
+	changeInline: function(imageNum){
+		console.log(this.getAnchor(this.contentArray[imageNum][0]));
+		console.log( $(this.getAnchor(this.contentArray[imageNum][0])) );
+		this.lightboxTemp.innerHTML = $(this.getAnchor(this.contentArray[imageNum][0])).innerHTML;
+		var w = this.lightboxTemp.getWidth();//+(this.options.contentOffset.height);
+		var h = this.lightboxTemp.getHeight();//+(this.options.contentOffset.width);
+		this.lightboxContent.innerHTML =  this.lightboxTemp.innerHTML;
+		this.resizeContentContainer( w,h );
+	},
+
+	//
+	//  changePage()
+	//  Hide most elements and load content into an iframe
+	//  
+	changePage: function(imageNum){
+		
+		//this.lightboxImage.src = "";
+		var newAJAX = new Ajax.Request(
+				this.contentArray[this.activeContent][0], {
+					method: 'get', 
+					parameters: '', 
+					onComplete: function(response) {
+						this.lightboxTemp.innerHTML = response.responseText;
+						//var layout =  this.lightboxContent.getLayout();
+						//layout.get('width'),layout.get('height') 
+						var w = this.lightboxTemp.getWidth();//+(this.options.contentOffset.height);
+						var h = this.lightboxTemp.getHeight();//+(this.options.contentOffset.width);
+						this.lightboxContent.innerHTML =  response.responseText;
+						this.resizeContentContainer( w,h );
+						//this._processWindow();
+					}.bind(this)
+				}
+			);
+	},
+	
     //
     //  changeImage()
     //  Hide most elements and preload image in preparation for resizing image container.
     //
     changeImage: function(imageNum) {   
         
-        this.activeImage = imageNum; // update global var
+        
+        
+        var imgPreloader = new Image();
+		
+        // once image is preloaded, resize image container
+        imgPreloader.onload = (function(){
+            this.lightboxImage.src = this.contentArray[this.activeContent][0];
+            this.resizeContentContainer(imgPreloader.width, imgPreloader.height);
+        }).bind(this);
+        imgPreloader.src = this.contentArray[this.activeContent][0];
+    },
 
-        // hide elements during transition
+	//
+	// hideControls()
+	// Hide most elements and
+	//  
+	hideControls : function(){
+		// hide elements during transition
         if (LightboxOptions.animate) this.loading.show();
+		this.lightboxContent.update("");
+		this.lightboxContent.hide();
         this.lightboxImage.hide();
         this.hoverNav.hide();
         this.prevLink.hide();
         this.nextLink.hide();
 		// HACK: Opera9 does not currently support scriptaculous opacity and appear fx
         this.imageDataContainer.setStyle({opacity: .0001});
-        this.numberDisplay.hide();      
-        
-        var imgPreloader = new Image();
-        
-        // once image is preloaded, resize image container
-
-
-        imgPreloader.onload = (function(){
-            this.lightboxImage.src = this.contentArray[this.activeImage][0];
-            this.resizeContentContainer(imgPreloader.width, imgPreloader.height);
-        }).bind(this);
-        imgPreloader.src = this.contentArray[this.activeImage][0];
-    },
+        this.numberDisplay.hide(); 
+	},
 
     //
     //  resizeContentContainer()
@@ -379,22 +457,39 @@ Lightbox.prototype = {
             this.prevLink.setStyle({ height: imgHeight + 'px' });
             this.nextLink.setStyle({ height: imgHeight + 'px' });
             this.imageDataContainer.setStyle({ width: widthNew + 'px' });
-
-            this.showImage();
-        }).bind(this).delay(timeout / 1000);
+			
+            
+			this.showContent();
+			
+		}).bind(this).delay(timeout / 1000);
     },
     
+	
+	
+	
     //
-    //  showImage()
+    //  showContent()
     //  Display image and begin preloading neighbors.
     //
-    showImage: function(){
+    showContent: function(){
         this.loading.hide();
-        new Effect.Appear(this.lightboxImage, { 
-            duration: this.resizeDuration, 
-            queue: 'end', 
-            afterFinish: (function(){ this.updateDetails(); }).bind(this) 
-        });
+		if (this.fileType(this.contentArray[this.activeContent][0]) == 'image') {
+			new Effect.Appear(this.lightboxImage, {
+				duration: this.resizeDuration,
+				queue: 'end',
+				afterFinish: (function(){
+					this.updateDetails();
+				}).bind(this)
+			});
+		}else {
+			new Effect.Appear(this.lightboxContent, {
+				duration: this.resizeDuration,
+				queue: 'end',
+				afterFinish: (function(){
+					this.updateDetails();
+				}).bind(this)
+			});
+		}
         this.preloadNeighborImages();
     },
 
@@ -405,21 +500,22 @@ Lightbox.prototype = {
     updateDetails: function() {
     
         // if caption is not null
-        if (this.contentArray[this.activeImage][1] != ""){
-            this.caption.update(this.contentArray[this.activeImage][1]).show();
+        if (this.contentArray[this.activeContent][1] != ""){
+            this.caption.update(this.contentArray[this.activeContent][1]).show();
         }else{
 			this.caption.update("");
 		}
 		
 		// if description is not null
-        if (this.contentArray[this.activeImage][2] != ""){
-            this.description.update(this.contentArray[this.activeImage][2]).show();
+        if (this.contentArray[this.activeContent][2] != ""){
+            this.description.update(this.contentArray[this.activeContent][2]).show();
         }
 		
         
         // if image is part of set display 'Image x of x' 
         if (this.contentArray.length > 1){
-            this.numberDisplay.update( LightboxOptions.labelImage + ' ' + (this.activeImage + 1) + ' ' + LightboxOptions.labelOf + '  ' + this.contentArray.length).show();
+            //this.numberDisplay.update( LightboxOptions.labelImage + ' ' + (this.activeContent + 1) + ' ' + LightboxOptions.labelOf + '  ' + this.contentArray.length).show();
+			this.numberDisplay.update( (this.activeContent + 1) + ' ' + LightboxOptions.labelOf + '  ' + this.contentArray.length).show();
         }
 		
 
@@ -449,10 +545,10 @@ Lightbox.prototype = {
         this.hoverNav.show();               
 
         // if not first image in set, display prev image button
-        if (this.activeImage > 0) this.prevLink.show();
+        if (this.activeContent > 0) this.prevLink.show();
 
         // if not last image in set, display next image button
-        if (this.activeImage < (this.contentArray.length - 1)) this.nextLink.show();
+        if (this.activeContent < (this.contentArray.length - 1)) this.nextLink.show();
         
         this.enableKeyboardNav();
     },
@@ -489,14 +585,14 @@ Lightbox.prototype = {
         if (key.match(/x|o|c/) || (keycode == escapeKey)){ // close lightbox
             this.end();
         } else if ((key == 'p') || (keycode == 37)){ // display previous image
-            if (this.activeImage != 0){
+            if (this.activeContent != 0){
                 this.disableKeyboardNav();
-                this.changeImage(this.activeImage - 1);
+                this.changeContent(this.activeContent - 1);
             }
         } else if ((key == 'n') || (keycode == 39)){ // display next image
-            if (this.activeImage != (this.contentArray.length - 1)){
+            if (this.activeContent != (this.contentArray.length - 1)){
                 this.disableKeyboardNav();
-                this.changeImage(this.activeImage + 1);
+                this.changeContent(this.activeContent + 1);
             }
         }
     },
@@ -507,13 +603,13 @@ Lightbox.prototype = {
     //
     preloadNeighborImages: function(){
         var preloadNextImage, preloadPrevImage;
-        if (this.contentArray.length > this.activeImage + 1){
+        if (this.contentArray.length > this.activeContent + 1){
             preloadNextImage = new Image();
-            preloadNextImage.src = this.contentArray[this.activeImage + 1][0];
+            preloadNextImage.src = this.contentArray[this.activeContent + 1][0];
         }
-        if (this.activeImage > 0){
+        if (this.activeContent > 0){
             preloadPrevImage = new Image();
-            preloadPrevImage.src = this.contentArray[this.activeImage - 1][0];
+            preloadPrevImage.src = this.contentArray[this.activeContent - 1][0];
         }
     
     },
@@ -525,8 +621,16 @@ Lightbox.prototype = {
         this.disableKeyboardNav();
         this.lightbox.hide();
         new Effect.Fade(this.overlay, { duration: this.overlayDuration });
-        $$('select', 'object', 'embed').each(function(node){ node.style.visibility = 'visible' });
+        this.showProblemElements();
     },
+
+	hideProblemElements : function(){
+		$$('select', 'object', 'embed').each(function(node){ node.style.visibility = 'hidden' });
+	},
+	
+	showProblemElements : function(){
+		$$('select', 'object', 'embed').each(function(node){ node.style.visibility = 'visible' });
+	},
 
     //
     //  getPageSize()
@@ -578,7 +682,45 @@ Lightbox.prototype = {
 		}
 
 		return [pageWidth,pageHeight];
-	}
+	},
+	
+	// determine the file type of a url
+	fileType : function(url){
+		var image = new RegExp("[^\.]\.("+LightboxOptions.fileTypes.image.join('|')+")\s*$", "i");
+		if (image.test(url)) return 'image';
+		var page = new RegExp("[^\.]\.("+LightboxOptions.fileTypes.page.join('|')+")\s*$", "i");
+		if (page.test(url) || url.substr((url.length-1), url.length) == '/') return 'page';
+		if (url.indexOf('#') > -1 && (document.domain == this.getDomain(url))) return 'inline';
+		return "unknown";
+	},
+	
+	//
+	// Get the anchor portion of a URL
+	//
+	getAnchor : function(url){
+		var content = url
+		if (content.indexOf('?') > -1) {
+			content = content.substring(0, content.indexOf('?'));
+		}
+		content = content.substring(content.indexOf('#')+1);
+		return content;
+	},
+	
+	//
+	//	Get the domain from a string.
+	//
+	getDomain : function(url) {    
+        var leadSlashes = url.indexOf('//');
+        var domainStart = leadSlashes+2;
+        var withoutResource = url.substring(domainStart, url.length);
+        var nextSlash = withoutResource.indexOf('/');
+        var domain = withoutResource.substring(0, nextSlash);
+		if (domain.indexOf(':') > -1){
+			var portColon = domain.indexOf(':');
+			domain = domain.substring(0, portColon);
+       	}
+		return domain;
+    }
 }
 
 document.observe('dom:loaded', function () { new Lightbox(); });
