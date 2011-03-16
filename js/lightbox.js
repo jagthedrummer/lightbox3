@@ -77,7 +77,7 @@ LightboxOptions = Object.extend({
 	defaultHeight : 250,  //the height used when we don't know what size the lightbox should be
 	fileTypes : {
 		page : ['asp', 'aspx', 'cgi', 'cfm', 'htm', 'html', 'pl', 'php4', 'php3', 'php', 'php5', 'phtml', 'rhtml', 'shtml', 'txt', 'vbs', 'rb'],
-		media : ['aif', 'aiff', 'asf', 'avi', 'divx', 'm1v', 'm2a', 'm2v', 'm3u', 'mid', 'midi', 'mov', 'moov', 'movie', 'mp2', 'mp3', 'mpa', 'mpa', 'mpe', 'mpeg', 'mpg', 'mpg', 'mpga', 'pps', 'qt', 'rm', 'ram', 'swf', 'viv', 'vivo', 'wav'],
+		video : ['aif', 'aiff', 'asf', 'avi', 'divx', 'm1v', 'm2a', 'm2v', 'm3u', 'mid', 'midi', 'mov', 'moov', 'movie', 'mp2', 'mp3', 'mp4', 'mpa', 'mpa', 'mpe', 'mpeg', 'mpg', 'mpg', 'mpga', 'pps', 'qt', 'rm', 'ram', 'swf', 'viv', 'vivo', 'wav'],
 		image : ['bmp', 'gif', 'jpeg', 'jpg', 'png', 'tiff','tif']
 	},
 	mimeTypes : {
@@ -100,6 +100,7 @@ LightboxOptions = Object.extend({
 		movie : 'video/x-sgi-movie',
 		mp2 : 'audio/mpeg',
 		mp3 : 'audio/mpeg3',
+		mp4 : 'video/mp4',
 		mpa : 'audio/mpeg',
 		mpa : 'video/mpeg',
 		mpe : 'video/mpeg',
@@ -348,9 +349,45 @@ Lightbox.prototype = {
 			this.changePage(linkNum);
 	    }else if(this.fileType(url) == "inline"){
 			this.changeInline(linkNum);
+		 }else if(this.fileType(url) == "video"){
+			this.changeVideo(linkNum);
 		}else{
-			alert("We can't handle this url : " + url);
+			alert("We can't handle this url : " + url + " - " + this.fileType(url));
 		}
+	},
+
+
+	//
+	//  changeVideo()
+	//  Hide most elements and load up some video!
+	//
+	changeVideo : function(imageNum){
+		console.log(this.getAnchor(this.contentArray[imageNum][0]));
+		
+		
+		
+		var w = parseInt(this.contentArray[imageNum][3]['lightbox_width']) || this.lightboxTemp.getWidth();//+(this.options.contentOffset.height);
+		var h = parseInt(this.contentArray[imageNum][3]['lightbox_height']) || this.lightboxTemp.getHeight();//+(this.options.contentOffset.width);
+		
+		var embed = "<div class=\"video-js-box\">"+
+    					"<video id=\"lbVideo\" class=\"video-js\" width=\"640\" height=\"264\" controls preload autoplay>"+
+							"<source src=\"http://video-js.zencoder.com/oceans-clip.mp4\" type='video/mp4; codecs=\"avc1.42E01E, mp4a.40.2\"' />"+
+							"<source src=\"http://video-js.zencoder.com/oceans-clip.webm\" type='video/webm; codecs=\"vp8, vorbis\"' />" +
+      						"<source src=\"http://video-js.zencoder.com/oceans-clip.ogv\" type='video/ogg; codecs=\"theora, vorbis\"' />" +
+      						"<object id=\"flash_fallback_1\" class=\"vjs-flash-fallback\" width=\"640\" height=\"264\" type=\"application/x-shockwave-flash\" data=\"http://releases.flowplayer.org/swf/flowplayer-3.2.1.swf\">"+
+	        					"<param name=\"movie\" value=\"http://releases.flowplayer.org/swf/flowplayer-3.2.1.swf\" />"+
+	        					"<param name=\"allowfullscreen\" value=\"true\" />"+
+	        					"<param name=\"flashvars\" value='config={\"playlist\":[{\"url\": \"http://video-js.zencoder.com/oceans-clip.mp4\",\"autoPlay\":true,\"autoBuffering\":true}]}' />"+
+	      					"</object>"+
+    					"</video>"+
+    					"<p class=\"vjs-no-video\"><strong>Download Video:</strong>"+
+      					"<a href=\"http://videojs.com\">HTML5 Video Player</a> by VideoJS"+
+    					"</p>"+
+  					"</div>";
+		
+		this.lightboxContent.innerHTML = embed;	
+		
+		this.resizeContentContainer( w,h );
 	},
 
 	//
@@ -512,6 +549,9 @@ Lightbox.prototype = {
 				queue: 'end',
 				afterFinish: (function(){
 					this.updateDetails();
+					
+					VideoJS.setup('lbVideo');
+					
 				}).bind(this)
 			});
 		}
@@ -649,7 +689,10 @@ Lightbox.prototype = {
     //
     end: function() {
         this.disableKeyboardNav();
-        this.lightbox.hide();
+        // make sure that a video goes away if it's playing
+		this.lightboxContent.innerHTML = "";
+		
+		this.lightbox.hide();
         new Effect.Fade(this.overlay, { duration: this.overlayDuration });
         this.showProblemElements();
     },
@@ -718,6 +761,8 @@ Lightbox.prototype = {
 	fileType : function(url){
 		var image = new RegExp("[^\.]\.("+LightboxOptions.fileTypes.image.join('|')+")\s*$", "i");
 		if (image.test(url)) return 'image';
+		var video = new RegExp("[^\.]\.("+LightboxOptions.fileTypes.video.join('|')+")\s*$", "i");
+		if (video.test(url)) return 'video';
 		var page = new RegExp("[^\.]\.("+LightboxOptions.fileTypes.page.join('|')+")\s*$", "i");
 		if (page.test(url) || url.substr((url.length-1), url.length) == '/') return 'page';
 		if (url.indexOf('#') > -1 && (document.domain == this.getDomain(url))) return 'inline';
