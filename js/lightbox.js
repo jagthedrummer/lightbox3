@@ -353,7 +353,7 @@ Lightbox.prototype = {
 	parseParams : function(params){
 		if(params == null) return {}
 		var paramHash = {};
-		var parameterArray = params.split(',');
+		var parameterArray = params.split(';');
 		parameterArray.each(function(pair){
 			pair = pair.split('=')
 			paramHash[pair[0]] = pair[1]
@@ -369,7 +369,9 @@ Lightbox.prototype = {
 		var url = this.contentArray[linkNum][0];
 		if(this.fileType(url) == "image"){
 			this.changeImage(linkNum);
-		}else if(this.fileType(url) == "page"){
+		}else if(this.fileType(url) == "page" && this.contentArray[linkNum][3].content_mode=="iframe" ){
+			this.changeIFrame(linkNum);
+		}else if(this.fileType(url) == "page" ){
 			this.changePage(linkNum);
 	    }else if(this.fileType(url) == "inline"){
 			this.changeInline(linkNum);
@@ -427,7 +429,7 @@ Lightbox.prototype = {
 		var ss = "";
 		ss += this.singleSourceString(this.contentArray[imageNum][0]);
 		console.log(this.contentArray[imageNum][3]);
-		var sources = this.contentArray[imageNum][3].src.split(';');
+		var sources = this.contentArray[imageNum][3].alt_src.split(',');
 		sources.each(function(src){
 				ss +=  this.singleSourceString(src);
 		}.bind(this));
@@ -458,6 +460,20 @@ Lightbox.prototype = {
 		var h = parseInt(this.contentArray[imageNum][3]['lightbox_height']) || this.lightboxTemp.getHeight();//+(this.options.contentOffset.width);
 		this.lightboxContent.innerHTML =  this.lightboxTemp.innerHTML;
 		this.resizeContentContainer( w,h );
+	},
+
+
+	//
+	//  changePage()
+	//  Hide most elements and load content into an iframe
+	//  
+	changeIFrame: function(imageNum){
+	
+		var w = parseInt(this.contentArray[imageNum][3]['lightbox_width']) || LightboxOptions.defaultWidth; //+(this.options.contentOffset.height);
+		var h = parseInt(this.contentArray[imageNum][3]['lightbox_height']) || LightboxOptions.defaultHeight;//+(this.options.contentOffset.width);
+		this.lightboxContent.innerHTML =  "<iframe src='"+this.contentArray[imageNum][0]+"' frameborder='0' width='"+w+"' height='"+h+"'></iframe>";
+		this.resizeContentContainer( w,h );
+	
 	},
 
 	//
@@ -574,7 +590,7 @@ Lightbox.prototype = {
         (function(){
             //this.prevLink.setStyle({ height: imgHeight + 'px' });
             //this.nextLink.setStyle({ height: imgHeight + 'px' });
-            this.imageDataContainer.setStyle({ width: widthNew + 'px' });
+            this.imageDataContainer.setStyle({ width: (widthNew) + 'px' });
 			
             
 			this.showContent();

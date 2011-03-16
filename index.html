@@ -25,6 +25,7 @@
   
 	<style type="text/css">
 		body{ color: #333; font: 13px 'Lucida Grande', Verdana, sans-serif;	}
+		pre{ border:1px solid #ccc; background: #eee; padding:10px; }
 	</style>
 
 </head>
@@ -68,7 +69,11 @@
 <li>Add a <code>rel="lightbox"</code> attribute to any link tag to activate the lightbox. For example:
 <pre><code>&lt;a href=&quot;images/image-1.jpg&quot; rel=&quot;lightbox&quot; title=&quot;my caption&quot;&gt;image #1&lt;/a&gt;
 </code></pre>
-<em>Optional: </em>Use the <code>title</code> attribute if you want to show a caption.		</li>
+<em>Optional: </em>Use the <code>title</code> attribute if you want to show a caption.		
+<br/>
+<em>Optional: </em>Use the <code>description</code> attribute if you want to show a longer description underneath the caption.
+<br/>&nbsp;
+</li>
 <li>If you have a set of related images that you would like to group, follow step one but additionally include a group name between square brackets in the rel attribute. For example: 
 <pre><code>&lt;a href=&quot;images/image-1.jpg&quot; rel=&quot;lightbox[roadtrip]&quot;&gt;image #1&lt;/a&gt;
 &lt;a href=&quot;images/image-2.jpg&quot; rel=&quot;lightbox[roadtrip]&quot;&gt;image #2&lt;/a&gt;
@@ -86,38 +91,105 @@ No limits to the number of image sets per page or how many images are allowed in
 <h2>Links to inline content</h2>
 
 
-<a href="#inline-content" rel="lightbox[gallery]" title="HTML Fragment" params="lightbox_width=300,lightbox_height=200"><img src="images/thumb-2.jpg" width="100" height="40" alt="Kubota Garden" /></a>
+<a href="#inline-content" rel="lightbox[gallery]" title="HTML Fragment" params="lightbox_width=300;lightbox_height=200"><img src="images/thumb-2.jpg" width="100" height="40" alt="Kubota Garden" /></a>
+
+<pre>
+	<code>
+&lt;a href="#inline-content" rel="lightbox[gallery]" title="HTML Fragment" params="lightbox_width=300;lightbox_height=200"&gt;
+	&lt;img src="images/thumb-2.jpg" width="100" height="40" alt="Kubota Garden" /&gt;
+&lt;/a&gt;
+&lt;div id="inline-content"&gt;
+	&lt;h3&gt;This is inline content&lt;/h3&gt;
+&lt;/div&gt;
+	</code>
+</pre>
 
 <div id="inline-content">
 	<h3>This is inline content</h3>
 	<p>You could have anything in here.  Really.</p>
 	
 	<a href="images/image-2.jpg" rel="lightbox"><img src="images/thumb-2.jpg" width="100" height="40" alt="" /></a>
-
 </div>
 
 
-<h2>Links to external content (this fails in Chrome when this page is visited locally - via file://... )</h2>
+<h2>Links to external content loaded via AJAX</h2>
 
 
 <a href="fragment.html" rel="lightbox[gallery]" title="HTML Fragment"><img src="images/thumb-2.jpg" width="100" height="40" alt="Kubota Garden" /></a>
 
-<h2>MP4 Video</h2>
+<p>
+	(This fails in Chrome when this page is visited locally - via file://... )
+</p>
+
+
+<h2>Video JS</h2>
 
 <a href="http://development-images.webapeel.com/apeel/assets/2010/12/7/34917/tiny.mp4.mp4" 
 	rel="lightbox[gallery]" 
 	title="Tornado!" 
-	params="src=http://development-images.webapeel.com/apeel/assets/2010/12/7/34917/tiny.mp4.webm;http://development-images.webapeel.com/apeel/assets/2010/12/7/34917/tiny.mp4.ogv,lightbox_width=720,lightbox_height=480">
-		<img src="images/thumb-3.jpg" width="100" height="40" alt="Tornado!" />
-</a>
+	description="Glimpse the awesome power of Mother Nature!"
+	params="alt_src=http://development-images.webapeel.com/apeel/assets/2010/12/7/34917/tiny.mp4.webm,http://development-images.webapeel.com/apeel/assets/2010/12/7/34917/tiny.mp4.ogv;lightbox_width=720;lightbox_height=480">
+		<img src="images/thumb-3.jpg" width="100" height="40" alt="Tornado!" /></a>
 
 
 <a href="http://video-js.zencoder.com/oceans-clip.mp4" 
 	rel="lightbox[gallery]" 
 	title="Oceans" 
-	params="src=http://video-js.zencoder.com/oceans-clip.webm;http://video-js.zencoder.com/oceans-clip.ogv,lightbox_width=640,lightbox_height=246">
-		<img src="images/thumb-4.jpg" width="100" height="40" alt="Oceans" />
-</a>
+	description="Experience the wonders of the deep!"
+	params="alt_src=http://video-js.zencoder.com/oceans-clip.webm,http://video-js.zencoder.com/oceans-clip.ogv;lightbox_width=640;lightbox_height=246">
+		<img src="images/thumb-4.jpg" width="100" height="40" alt="Oceans" /></a>
+
+<p>
+	With videos (and inline and AJAX content) you should always specify the <code>lightbox_width</code> and <code>lightbox_height</code> params.
+</p>
+<pre>
+	<code>
+
+&lt;a href="clip.mp4" 
+	rel="lightbox[gallery]" 
+	title="Oceans" 
+	params="alt_src=clip.webm,clip.ogv;lightbox_width=640;lightbox_height=246"&gt;
+		&lt;img src="images/thumb-4.jpg" width="100" height="40" alt="Oceans" /&gt;&lt;/a&gt;
+		
+	</code>
+</pre>
+
+<h2>External Pages in an iframe</h2>
+
+<p>
+	Pass the <code>content_mode</code> param with a value of <code>iframe</code> to turn any link into an iframe in a lightbox.
+</p>
+<a href="http://www.octolabs.com/" title="Octolabs" rel="lightbox[gallery]" params="lightbox_width=990;lightbox_height=650;content_mode=iframe"><img src="http://www.rarearth.tv/images/octo_logo.png" width="71" height="75" alt="Octolabs"/></a>
+
+<p>&nbsp;</p>
+<hr/>
+<p>&nbsp;</p>
+
+
+<h2>Link Params</h2>
+
+<p>
+	Additional configuration parameters can be passed into the lightbox by way of the 'params' attribute.<br/>
+	Parameters are passed in pairs, with each pair seperated by a semicolon (';').<br/>
+	Multiple values for a parameter can be seperated by a comma (',').
+</p>
+<p>
+	Avaliable parameters:
+</p>
+<ul>
+	<li>
+		<em>lightbox_height</em> : <i>integer</i> - The height of the lightbox, in pixels, for this content.
+		<pre>&lt;a params="lightbox_height=200" src="..."&gt;..&lt;/a&gt;</pre>
+	</li>
+	<li>
+		<em>lightbox_width</em> : <i>integer</i> - The width of the lightbox, in pixels, for this content.
+		<pre>&lt;a params="lightbox_width=400;lightbox_height=200" src="..."&gt;..&lt;/a&gt;</pre>
+	</li>
+	<li>
+		<em>src</em> : <i>string</i> - One or more URLs (relative or fully qualified) for fallback media sources.  Multiple sources should be serated by a comma.
+		<pre>&lt;a params="alt_src=movie.webm,http://somedomain.com/movie.ogv" src="movie.mp4"&gt;..&lt;/a&gt;</pre>
+	</li>
+</ul>
 
 <hr/>
 <select name="testSelect">

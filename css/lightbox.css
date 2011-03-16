@@ -101,14 +101,13 @@ border-top-right-radius: 8px;
 	margin-top:-8px;
 	line-height: 1.4em; 
 	overflow: auto; 
-	width: 100%	; 
+	width: 90%	; 
 	-webkit-border-bottom-right-radius: 8px;
 -webkit-border-bottom-left-radius: 8px;
 -moz-border-radius-bottomright: 8px;
 -moz-border-radius-bottomleft: 8px;
 border-bottom-right-radius: 8px;
 border-bottom-left-radius: 8px;
-
 }
 
 #imageData{	padding:0 10px; color: #666; }
