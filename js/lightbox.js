@@ -65,7 +65,7 @@ LightboxOptions = Object.extend({
     overlayOpacity: 0.8,   // controls transparency of shadow overlay
 
     animate: true,         // toggles resizing animations
-    resizeSpeed: 7,        // controls the speed of the image resizing animations (1=slowest and 10=fastest)
+    resizeSpeed: 9,        // controls the speed of the image resizing animations (1=slowest and 10=fastest)
 
     borderSize: 10,         //if you adjust the padding in the CSS, you will need to update this variable
 
@@ -79,6 +79,11 @@ LightboxOptions = Object.extend({
 		page : ['asp', 'aspx', 'cgi', 'cfm', 'htm', 'html', 'pl', 'php4', 'php3', 'php', 'php5', 'phtml', 'rhtml', 'shtml', 'txt', 'vbs', 'rb'],
 		video : ['aif', 'aiff', 'asf', 'avi', 'divx', 'm1v', 'm2a', 'm2v', 'm3u', 'mid', 'midi', 'mov', 'moov', 'movie', 'mp2', 'mp3', 'mp4', 'mpa', 'mpa', 'mpe', 'mpeg', 'mpg', 'mpg', 'mpga', 'pps', 'qt', 'rm', 'ram', 'swf', 'viv', 'vivo', 'wav'],
 		image : ['bmp', 'gif', 'jpeg', 'jpg', 'png', 'tiff','tif']
+	},
+	codecs : {
+		mp4 : 'avc1.42E01E, mp4a.40.2',
+		webm : 'vp8, vorbis',
+		ogv : 'theora, vorbis' 
 	},
 	mimeTypes : {
 		avi : 'video/avi',
@@ -108,6 +113,7 @@ LightboxOptions = Object.extend({
 		mpg : 'audio/mpeg',
 		mpg : 'video/mpeg',
 		mpga : 'audio/mpeg',
+		ogv : 'video/ogg',
 		pdf : 'application/pdf',
 		png : 'image/png',
 		pps : 'application/mspowerpoint',
@@ -120,8 +126,26 @@ LightboxOptions = Object.extend({
 		viv : 'video/vivo',
 		vivo : 'video/vivo',
 		wav : 'audio/wav',
+		webm : 'video/webm',
 		wmv : 'application/x-mplayer2'			
-	}	
+	},
+	
+	videoEmbed : "<div class=\"video-js-box\">"+
+					"<video id=\"lbVideo\" class=\"video-js\" width=\"#{width}\" height=\"#{height}\" controls preload autoplay>"+
+						//"<source src=\"http://video-js.zencoder.com/oceans-clip.mp4\" type='video/mp4; codecs=\"avc1.42E01E, mp4a.40.2\"' />"+
+						//"<source src=\"http://video-js.zencoder.com/oceans-clip.webm\" type='video/webm; codecs=\"vp8, vorbis\"' />" +
+						//"<source src=\"http://video-js.zencoder.com/oceans-clip.ogv\" type='video/ogg; codecs=\"theora, vorbis\"' />" +
+						"#{sources}" +
+						"<object id=\"flash_fallback_1\" class=\"vjs-flash-fallback\" width=\"#{width}\" height=\"#{height}\" type=\"application/x-shockwave-flash\" data=\"http://releases.flowplayer.org/swf/flowplayer-3.2.1.swf\">"+
+	    					"<param name=\"movie\" value=\"http://releases.flowplayer.org/swf/flowplayer-3.2.1.swf\" />"+
+	    					"<param name=\"allowfullscreen\" value=\"true\" />"+
+	    					"<param name=\"flashvars\" value='config={\"playlist\":[{\"url\": \"#{source}\",\"autoPlay\":true,\"autoBuffering\":true}]}' />"+
+	  					"</object>"+
+					"</video>"+
+					"<p class=\"vjs-no-video\"><strong>Download Video:</strong>"+
+						"<a href=\"http://videojs.com\">HTML5 Video Player</a> by VideoJS"+
+					"</p>"+
+				"</div>"
 
 }, window.LightboxOptions || {});
 
@@ -369,9 +393,9 @@ Lightbox.prototype = {
 		var w = parseInt(this.contentArray[imageNum][3]['lightbox_width']) || this.lightboxTemp.getWidth();//+(this.options.contentOffset.height);
 		var h = parseInt(this.contentArray[imageNum][3]['lightbox_height']) || this.lightboxTemp.getHeight();//+(this.options.contentOffset.width);
 		
-		var embed = "<div class=\"video-js-box\">"+
+		/*var embed = "<div class=\"video-js-box\">"+
     					"<video id=\"lbVideo\" class=\"video-js\" width=\"640\" height=\"264\" controls preload autoplay>"+
-							"<source src=\"http://video-js.zencoder.com/oceans-clip.mp4\" type='video/mp4; codecs=\"avc1.42E01E, mp4a.40.2\"' />"+
+							"<source src= sr\"http://video-js.zencoder.com/oceans-clip.mp4\" type='video/mp4; codecs=\"avc1.42E01E, mp4a.40.2\"' />"+
 							"<source src=\"http://video-js.zencoder.com/oceans-clip.webm\" type='video/webm; codecs=\"vp8, vorbis\"' />" +
       						"<source src=\"http://video-js.zencoder.com/oceans-clip.ogv\" type='video/ogg; codecs=\"theora, vorbis\"' />" +
       						"<object id=\"flash_fallback_1\" class=\"vjs-flash-fallback\" width=\"640\" height=\"264\" type=\"application/x-shockwave-flash\" data=\"http://releases.flowplayer.org/swf/flowplayer-3.2.1.swf\">"+
@@ -384,10 +408,42 @@ Lightbox.prototype = {
       					"<a href=\"http://videojs.com\">HTML5 Video Player</a> by VideoJS"+
     					"</p>"+
   					"</div>";
-		
+		*/
+		var sources = this.buildSourceString(imageNum); "<source src=\""+this.contentArray[imageNum][0]+"\" type='video/mp4; codecs=\"avc1.42E01E, mp4a.40.2\"' />";
+		var embed = LightboxOptions.videoEmbed.gsub('#{source}',this.contentArray[imageNum][0]);
+		embed = embed.gsub('#{sources}',sources)
+		embed = embed.gsub('#{width}',w)
+		embed = embed.gsub('#{height}',h)
 		this.lightboxContent.innerHTML = embed;	
-		
+		console.log(embed)
 		this.resizeContentContainer( w,h );
+	},
+	
+	//
+	//  buildSourceString()
+	//  Builds a list of <source> tags for videos
+	//
+	buildSourceString : function(imageNum){
+		var ss = "";
+		ss += this.singleSourceString(this.contentArray[imageNum][0]);
+		console.log(this.contentArray[imageNum][3]);
+		var sources = this.contentArray[imageNum][3].src.split(';');
+		sources.each(function(src){
+				ss +=  this.singleSourceString(src);
+		}.bind(this));
+		/*this.contentArray[imageNum][3].each(function(pair){
+			if(pair.key == 'src'){
+				ss +=  this.singleSourceString(pair.value);
+			}
+		}.bind(this));
+		*/
+		return ss;
+	},
+
+	singleSourceString : function(url){
+		var ext = this.getFileExtension(url);
+		var ss = "<source src='"+url+"' type='"+LightboxOptions.mimeTypes[ext]+"; codecs=\""+LightboxOptions.codecs[ext]+"\"'/>";
+		return ss;
 	},
 
 	//
@@ -549,9 +605,9 @@ Lightbox.prototype = {
 				queue: 'end',
 				afterFinish: (function(){
 					this.updateDetails();
-					
-					VideoJS.setup('lbVideo');
-					
+					if(this.fileType(this.contentArray[this.activeContent][0]) == 'video'){
+						VideoJS.setup('lbVideo');
+					}
 				}).bind(this)
 			});
 		}
@@ -779,6 +835,22 @@ Lightbox.prototype = {
 		}
 		content = content.substring(content.indexOf('#')+1);
 		return content;
+	},
+	
+	//
+	//	Get the file extension from a string.
+	//
+	getFileExtension : function(url) {
+		if (url.indexOf('?') > -1) {
+			url = url.substring(0, url.indexOf('?'));
+		}
+		var extenstion = '';
+		for (var x = (url.length-1); x > -1; x--) {
+			if (url.charAt(x) == '.') {
+				return extenstion;
+			}
+			extenstion = url.charAt(x)+extenstion;
+		}
 	},
 	
 	//
