@@ -161,14 +161,19 @@ Lightbox.prototype = {
         //  <div id="lightbox">
         //      <div id="outerContentContainer">
         //          <div id="contentContainer">
+		//				<div id="lbNav">
+		//                  <a href="#" id="lbPrevLink"></a>
+		//					<a href="#" id="lbCloseLink"></a>
+        //                  <a href="#" id="lbNextLink"></a>
+		//				</div>
 		//              <div id="lightboxContent">
         //                  
 		//              </div>
 		//				<img id="lightboxImage"/>
-        //              <div style="" id="hoverNav">
-        //                  <a href="#" id="prevLink"></a>
-        //                  <a href="#" id="nextLink"></a>
-        //              </div>
+        ////              <div style="" id="hoverNav">
+        ////                  <a href="#" id="prevLink"></a>
+        ////                  <a href="#" id="nextLink"></a>
+        ////              </div>
         //              <div id="loading">
         //                  <a href="#" id="loadingLink">
         //                      <img src="images/loading.gif">
@@ -183,11 +188,11 @@ Lightbox.prototype = {
 		//					<span id="description"></span>
         //                  <span id="numberDisplay"></span>
         //              </div>
-        //              <div id="bottomNav">
-        //                  <a href="#" id="bottomNavClose">
-        //                      <img src="images/close.gif">
-        //                  </a>
-        //              </div>
+        ////              <div id="bottomNav">
+        ////                  <a href="#" id="bottomNavClose">
+        ////                      <img src="images/close.gif">
+        ////                  </a>
+        ////              </div>
         //          </div>
         //      </div>
         //  </div>
@@ -200,12 +205,17 @@ Lightbox.prototype = {
         objBody.appendChild(Builder.node('div',{id:'lightbox'}, [
             Builder.node('div',{id:'outerContentContainer'}, 
                 Builder.node('div',{id:'contentContainer'}, [
+					Builder.node('div',{'id': 'lbNav', 'class':'lb-clearfix'}, [
+						Builder.node('a',{'id':'lbPrevLink', href: '#' }),
+						Builder.node('a',{'id':'lbCloseLink', href: '#' }),
+                        Builder.node('a',{ 'id':'lbNextLink', href: '#' })
+					]), 
 					Builder.node('div',{id:'lightboxContent'}, []), 
 					Builder.node('img',{id:'lightboxImage'}),
-                    Builder.node('div',{id:'hoverNav'}, [
-                        Builder.node('a',{id:'prevLink', href: '#', 'class':'lb' }),
-                        Builder.node('a',{ id:'nextLink', href: '#', 'class':'lb' })
-                    ]),
+                    //Builder.node('div',{id:'hoverNav'}, [
+                    //    Builder.node('a',{id:'prevLink', href: '#', 'class':'lb' }),
+                    //    Builder.node('a',{ id:'nextLink', href: '#', 'class':'lb' })
+                    //]),
                     Builder.node('div',{id:'loading'}, 
                         Builder.node('a',{id:'loadingLink', href: '#', 'class':'lb' }, 
                             Builder.node('img', {src: LightboxOptions.fileLoadingImage})
@@ -220,11 +230,11 @@ Lightbox.prototype = {
                         Builder.node('span',{id:'numberDisplay'}),
 						Builder.node('span',{id:'description'})
                     ]),
-                    Builder.node('div',{id:'bottomNav'},
-                        Builder.node('a',{id:'bottomNavClose', href: '#' , 'class':'lb' },
-                            Builder.node('img', { src: LightboxOptions.fileBottomNavCloseImage })
-                        )
-                    )
+                    //Builder.node('div',{id:'bottomNav'},
+                    //    Builder.node('a',{id:'bottomNavClose', href: '#' , 'class':'lb' },
+                    //        Builder.node('img', { src: LightboxOptions.fileBottomNavCloseImage })
+                    //    )
+                    //)
                 ])
             )
         ]));
@@ -234,15 +244,15 @@ Lightbox.prototype = {
 		$('overlay').hide().observe('click', (function() { this.end(); }).bind(this));
 		$('lightbox').hide().observe('click', (function(event) { if (event.element().id == 'lightbox') this.end(); }).bind(this));
 		$('outerContentContainer').setStyle({ width: size, height: size });
-		$('prevLink').observe('click', (function(event) { event.stop(); this.changeContent(this.activeContent - 1); }).bindAsEventListener(this));
-		$('nextLink').observe('click', (function(event) { event.stop(); this.changeContent(this.activeContent + 1); }).bindAsEventListener(this));
+		$('lbPrevLink').observe('click', (function(event) { event.stop(); this.changeContent(this.activeContent - 1); }).bindAsEventListener(this));
+		$('lbNextLink').observe('click', (function(event) { event.stop(); this.changeContent(this.activeContent + 1); }).bindAsEventListener(this));
 		$('loadingLink').observe('click', (function(event) { event.stop(); this.end(); }).bind(this));
-		$('bottomNavClose').observe('click', (function(event) { event.stop(); this.end(); }).bind(this));
+		$('lbCloseLink').observe('click', (function(event) { event.stop(); this.end(); }).bind(this));
 
         var th = this;
         (function(){
             var ids = 
-                'overlay lightbox outerContentContainer contentContainer lightboxContent lightboxImage hoverNav prevLink nextLink loading loadingLink ' + 
+                'overlay lightbox outerContentContainer contentContainer lightboxContent lightboxImage hoverNav lbNav lbPrevLink lbNextLink lbCloseLink loading loadingLink ' + 
                 'imageDataContainer imageData imageDetails caption numberDisplay description bottomNav bottomNavClose lightboxTemp';   
             $w(ids).each(function(id){ th[id] = $(id); });
         }).defer();
@@ -410,9 +420,10 @@ Lightbox.prototype = {
 		this.lightboxContent.update("");
 		this.lightboxContent.hide();
         this.lightboxImage.hide();
-        this.hoverNav.hide();
-        this.prevLink.hide();
-        this.nextLink.hide();
+        //this.hoverNav.hide();
+		this.lbNav.hide();
+        this.lbPrevLink.style.visibility = 'hidden' ; //hide();
+        this.lbNextLink.style.visibility = 'hidden' ;//hide();
 		// HACK: Opera9 does not currently support scriptaculous opacity and appear fx
         this.imageDataContainer.setStyle({opacity: .0001});
         this.numberDisplay.hide(); 
@@ -468,8 +479,8 @@ Lightbox.prototype = {
         }
 
         (function(){
-            this.prevLink.setStyle({ height: imgHeight + 'px' });
-            this.nextLink.setStyle({ height: imgHeight + 'px' });
+            //this.prevLink.setStyle({ height: imgHeight + 'px' });
+            //this.nextLink.setStyle({ height: imgHeight + 'px' });
             this.imageDataContainer.setStyle({ width: widthNew + 'px' });
 			
             
@@ -532,11 +543,16 @@ Lightbox.prototype = {
 			this.numberDisplay.update( (this.activeContent + 1) + ' ' + LightboxOptions.labelOf + '  ' + this.contentArray.length).show();
         }
 		
-
+		this.updateNav();
+		this.lbNav.style.top = "0px";
+		
+		
         new Effect.Parallel(
             [ 
-                new Effect.SlideDown(this.imageDataContainer, { sync: true, duration: this.resizeDuration, from: 0.0, to: 1.0 }), 
-                new Effect.Appear(this.imageDataContainer, { sync: true, duration: this.resizeDuration }) 
+                new Effect.SlideDown(this.imageDataContainer, { sync: true, duration: this.resizeDuration, from: 0.0, to: 1.0 }),
+				new Effect.Move(this.lbNav, { sync: true, duration: this.resizeDuration, from: 0.0, to: 1.0, y:-15, x : "50%" }), 
+                new Effect.Appear(this.lbNav, { sync: true, duration: this.resizeDuration }), 
+			    new Effect.Appear(this.imageDataContainer, { sync: true, duration: this.resizeDuration }) 
             ], 
             { 
                 duration: this.resizeDuration, 
@@ -544,7 +560,7 @@ Lightbox.prototype = {
 	                // update overlay size and update nav
 	                var arrayPageSize = this.getPageSize();
 	                this.overlay.setStyle({ height: arrayPageSize[1] + 'px' });
-	                this.updateNav();
+	                
                 }).bind(this)
             } 
         );
@@ -556,13 +572,13 @@ Lightbox.prototype = {
     //
     updateNav: function() {
 
-        this.hoverNav.show();               
+        //this.hoverNav.show();               
 
         // if not first image in set, display prev image button
-        if (this.activeContent > 0) this.prevLink.show();
+        if (this.activeContent > 0) this.lbPrevLink.style.visibility = 'visible';
 
         // if not last image in set, display next image button
-        if (this.activeContent < (this.contentArray.length - 1)) this.nextLink.show();
+        if (this.activeContent < (this.contentArray.length - 1)) this.lbNextLink.style.visibility = 'visible';
         
         this.enableKeyboardNav();
     },
