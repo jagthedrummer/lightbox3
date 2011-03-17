@@ -28,6 +28,10 @@
 //  http://www.p51labs.com/lightwindow/
 //  
 // -----------------------------------------------------------------------------------
+//
+//  Video sharing code from Flower.
+//  
+//  https://github.com/cashmusic/Flower
 /*
 
     Table of Contents
@@ -378,10 +382,39 @@ Lightbox.prototype = {
 		 }else if(this.fileType(url) == "video"){
 			this.changeVideo(linkNum);
 		}else{
-			alert("We can't handle this url : " + url + " - " + this.fileType(url));
+		    // we're down to something unknown.  Let's see if it matches a known video embedding site.
+		    var videoObjURL = this.parseVideoURL(url);
+		    if(videoObjURL){
+		        this.changeEmbed(linkNum);
+		    }else{
+		        //we really don't know about this
+		        //we'll just punt it into an iframe
+		        this.changeIFrame(linkNum);
+			    //alert("We can't handle this url : " + url + " - " + this.fileType(url));
+	        }
 		}
 	},
 
+
+    //
+	//  changeVideo()
+	//  Hide most elements and load up some video!
+	//
+	changeEmbed : function(imageNum){
+	    console.log("trying embed for " +  this.contentArray[imageNum][0]);
+		var videoObjURL = this.parseVideoURL(this.contentArray[imageNum][0]);
+	    console.log("videoObjURL = " + videoObjURL);
+	    
+	    var w = parseInt(this.contentArray[imageNum][3]['lightbox_width']) || LightboxOptions.defaultWidth; //+(this.options.contentOffset.height);
+		var h = parseInt(this.contentArray[imageNum][3]['lightbox_height']) || LightboxOptions.defaultHeight;//+(this.options.contentOffset.width);
+		this.lightboxContent.innerHTML = '<object id="lbVideoObject" standby="loading video..." type="application/x-shockwave-flash" width="'+
+		                                    w+'" height="'+h+'" data="'+videoObjURL+'">'+
+		                                        '<param name="movie" value="'+videoObjURL+'" /><param name="bgcolor" value="#fff" />'+
+		                                        '<param name="allowFullScreen" value="true" /><param name="wmode" value="window" /><param name="allowScriptAccess" value="always" />'+
+		                                 '</object>'
+		this.resizeContentContainer( w,h );
+		
+	},
 
 	//
 	//  changeVideo()
@@ -829,6 +862,11 @@ Lightbox.prototype = {
 		return [pageWidth,pageHeight];
 	},
 	
+	/*
+	* A few functions borrowed from lightwindow
+	* http://www.p51labs.com/lightwindow/
+	*/
+	
 	// determine the file type of a url
 	fileType : function(url){
 		var image = new RegExp("[^\.]\.("+LightboxOptions.fileTypes.image.join('|')+")\s*$", "i");
@@ -883,7 +921,53 @@ Lightbox.prototype = {
 			domain = domain.substring(0, portColon);
        	}
 		return domain;
-    }
+    },
+    
+    /*
+     *  Taken from Flower
+     *  https://github.com/cashmusic/Flower
+     */
+    parseVideoURL: function(url) {
+		/*
+		Function parseVideoURL(url url)
+		
+		Accepts a URL, checks for validity against popular video sharing sites, and
+		returns a direct URL for the embeddable SWF based on that site's standard
+		format. Returns false if no known format is found.
+		
+		Supports: youtube.com links
+				  google video links
+				  vimeo.com links
+		
+		*/
+		var newUrl = false,
+			urlLc = url.toLowerCase(),
+			miscVar;
+		if (urlLc.include('youtube.com/watch?v=')) {
+			newUrl = url.replace(/watch\?v\=/i,'v/');
+			miscVar = newUrl.indexOf('&');
+			if (miscVar > -1) {newUrl = newUrl.substr(0,miscVar);}
+			newUrl += '&amp;autoplay=1';
+		} else if (urlLc.include('fuseaction=vids.individual&videoid=')) {
+			newUrl = 'http://lads.myspace.com/videos/vplayer.swf?m=';
+			miscVar = urlLc.lastIndexOf('=')+1;
+			newUrl += urlLc.substr(miscVar,urlLc.length - miscVar);
+			newUrl += '&v=2&type=video&a=1';
+		} else if (urlLc.include('video.google.com/videoplay?docid=')) {
+			newUrl = url.replace(/videoplay/i,'googleplayer.swf');
+			miscVar = newUrl.indexOf('&');
+			if (miscVar > -1) {newUrl = newUrl.substr(0,miscVar);}
+		} else if (urlLc.include('vimeo.com/')) {
+			newUrl = url.replace('vimeo.com/','vimeo.com/moogaloop.swf?clip_id=');
+			newUrl += '&amp;server=vimeo.com&amp;fullscreen=1&amp;show_title=1&amp;show_byline=1&amp;show_portrait=0&amp;js_api=1&amp;autoplay=1';
+		} else if (urlLc.include('vevo.com/watch')) {
+			newUrl = 'http://www.vevo.com/VideoPlayer/Embedded?videoId=';
+			miscVar = urlLc.lastIndexOf('/')+1;
+			newUrl += urlLc.substr(miscVar,urlLc.length - miscVar);
+			newUrl += '&autoplay=1&playerType=embedded&playlist=false';
+		} 
+		return newUrl;
+	},
 }
 
 document.observe('dom:loaded', function () { new Lightbox(); });
