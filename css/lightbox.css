@@ -17,6 +17,13 @@
 #contentContainer{ padding: 10px; }
 
 #loading{ position: absolute; top: 40%; left: 0%; height: 25%; width: 100%; text-align: center; line-height: 0; }
+#loadingLink{
+  display:block;
+  height:100%;
+  width:100%;
+  background:transparent url(images/loading.gif) no-repeat;
+}
+
 #hoverNav{ position: absolute; top: 0; left: 0; height: 100%; width: 100%; z-index: 10; }
 #imageContainer>#hoverNav{ left: 0;}
 #hoverNav a{ outline: none;}
