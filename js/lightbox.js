@@ -234,30 +234,26 @@ Lightbox.prototype = {
         objBody.appendChild(Builder.node('div',{id:'lightbox'}, [
             Builder.node('div',{id:'outerContentContainer'}, 
                 Builder.node('div',{id:'contentContainer'}, [
-          					Builder.node('div',{'id': 'lbNav', 'class':'lb-clearfix'}, [
-          						Builder.node('a',{'id':'lbPrevLink', href: '#' }),
-          						Builder.node('a',{'id':'lbCloseLink', href: '#' }),
-                                  Builder.node('a',{ 'id':'lbNextLink', href: '#' })
-          					]), 
-          					Builder.node('div',{id:'lightboxContent'}, []), 
-          					Builder.node('img',{id:'lightboxImage'}),
-                    //Builder.node('div',{id:'hoverNav'}, [
-                    //    Builder.node('a',{id:'prevLink', href: '#', 'class':'lb' }),
-                    //    Builder.node('a',{ id:'nextLink', href: '#', 'class':'lb' })
-                    //]),
-                    Builder.node('div',{id:'loading'}, 
-                        Builder.node('a',{id:'loadingLink', href: '#', 'class':'lb' }, 
-                            []//Builder.node('img', {src: LightboxOptions.fileLoadingImage})
-                        )
-                    )
-                ]), //contentContainer
-            
+      					Builder.node('div',{'id': 'lbNav', 'class':'lb-clearfix'}, [
+      						Builder.node('a',{'id':'lbPrevLink', href: '#' }),
+      						Builder.node('a',{'id':'lbCloseLink', href: '#' }),
+                              Builder.node('a',{ 'id':'lbNextLink', href: '#' })
+      					  ]), 
+      					  Builder.node('div',{id:'lightboxContent'}, []), 
+      					  Builder.node('img',{id:'lightboxImage'}),
+                  Builder.node('div',{id:'loading'}, 
+                      Builder.node('a',{id:'loadingLink', href: '#', 'class':'lb' }, 
+                          Builder.node('img', {src: LightboxOptions.fileLoadingImage})
+                      )
+                  )
+                ]) //contentContainer
+            ),
             Builder.node('div', {id:'imageDataContainer'},
                 Builder.node('div',{id:'imageData'}, [
                     Builder.node('div',{id:'imageDetails'}, [
                         Builder.node('span',{id:'caption'}),
                         Builder.node('span',{id:'numberDisplay'}),
-						            Builder.node('span',{id:'description'})
+						Builder.node('span',{id:'description'})
                     ]),
                     //Builder.node('div',{id:'bottomNav'},
                     //    Builder.node('a',{id:'bottomNavClose', href: '#' , 'class':'lb' },
