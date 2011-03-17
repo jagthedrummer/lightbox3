@@ -21,7 +21,7 @@
   display:block;
   height:100%;
   width:100%;
-  background:transparent url(images/loading.gif) no-repeat;
+  background:transparent url(../images/loading.gif) no-repeat;
 }
 
 #hoverNav{ position: absolute; top: 0; left: 0; height: 100%; width: 100%; z-index: 10; }
