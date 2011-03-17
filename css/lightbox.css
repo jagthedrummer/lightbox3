@@ -51,12 +51,12 @@
 }
 
 #lbNav{
-	width:80px;
+	width:136px;
 	position:absolute;
-	top:-20px;
+	top:-32px;
 	left:50%;
 	
-	margin-left:-40px;
+	margin-left:-68px;
 	margin-bottom:10px;
 	
 	background:white;
@@ -71,34 +71,42 @@ border-top-right-radius: 8px;
 
 #lbNav a#lbPrevLink,#lbNav a#lbCloseLink,#lbNav a#lbNextLink{
 	display:block;
-	height:20px;
+	height:32px;
+	opacity: .5;
+	-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=50)"; // first!
+  filter: alpha(opacity=50);  
 }
 
 #lbNav a#lbPrevLink{
-	background: url(../images/arrow_left.png) 0% 50% no-repeat; 
+	background: url(../images/back_alt.png) 0% 50% no-repeat; 
 	width:45%;
-	width:20px;
+	width:32px;
 	float:left;
 	margin-left:10px;
+	margin-right:10px;
 }
 
 #lbNav a#lbNextLink{
-	background: url(../images/arrow_right.png) 100% 50% no-repeat; 
+	background: url(../images/forward_alt.png) 100% 50% no-repeat; 
 	width:45%;
-	width:20px;
+	width:32px;
 	float:left;
 	
 }
 
 #lbNav a#lbCloseLink{
-	background: url(../images/cancel.png) 50% 50% no-repeat; 
+	background: url(../images/minus.png) 50% 50% no-repeat; 
 	width:10%;
-	width:20px;
+	width:32px;
 	float:left;
+	margin-right:10px;
 }
 
 #lbNav a#lbPrevLink:hover,#lbNav a#lbCloseLink:hover,#lbNav a#lbNextLink:hover{
-	background-color:#eee;
+	/*background-color:#eee;*/
+	opacity: .99;
+  -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=99)"; // first!
+  filter: alpha(opacity=99);  
 }
 
 #imageDataContainer{ 

@@ -687,7 +687,7 @@ Lightbox.prototype = {
         new Effect.Parallel(
             [ 
                 new Effect.SlideDown(this.imageDataContainer, { sync: true, duration: this.resizeDuration, from: 0.0, to: 1.0 }),
-				new Effect.Move(this.lbNav, { sync: true, duration: this.resizeDuration, from: 0.0, to: 1.0, y:-15, x : "50%" }), 
+				new Effect.Move(this.lbNav, { sync: true, duration: this.resizeDuration, from: 0.0, to: 1.0, y:-25, x : "50%" }), 
                 new Effect.Appear(this.lbNav, { sync: true, duration: this.resizeDuration }), 
 			    new Effect.Appear(this.imageDataContainer, { sync: true, duration: this.resizeDuration }) 
             ], 
