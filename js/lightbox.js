@@ -306,7 +306,6 @@ Lightbox.prototype = {
 		//Now hide any inline content that will be handled by the lightbox
 		var inlines = $$('a[rel^=lightbox][href^=#]');
 		inlines.each(function(link){
-			console.log(link.href)
 			if(this.fileType(link.href) == "inline"){
 				$(this.getAnchor(link.href)).hide();
 			}
@@ -401,11 +400,11 @@ Lightbox.prototype = {
 	//  Hide most elements and load up some video!
 	//
 	changeEmbed : function(imageNum){
-	    console.log("trying embed for " +  this.contentArray[imageNum][0]);
-		var videoObjURL = this.parseVideoURL(this.contentArray[imageNum][0]);
-	    console.log("videoObjURL = " + videoObjURL);
 	    
-	    var w = parseInt(this.contentArray[imageNum][3]['lightbox_width']) || LightboxOptions.defaultWidth; //+(this.options.contentOffset.height);
+		var videoObjURL = this.parseVideoURL(this.contentArray[imageNum][0]);
+	    
+	    
+	  var w = parseInt(this.contentArray[imageNum][3]['lightbox_width']) || LightboxOptions.defaultWidth; //+(this.options.contentOffset.height);
 		var h = parseInt(this.contentArray[imageNum][3]['lightbox_height']) || LightboxOptions.defaultHeight;//+(this.options.contentOffset.width);
 		this.lightboxContent.innerHTML = '<object id="lbVideoObject" standby="loading video..." type="application/x-shockwave-flash" width="'+
 		                                    w+'" height="'+h+'" data="'+videoObjURL+'">'+
@@ -421,8 +420,6 @@ Lightbox.prototype = {
 	//  Hide most elements and load up some video!
 	//
 	changeVideo : function(imageNum){
-		console.log(this.getAnchor(this.contentArray[imageNum][0]));
-		
 		
 		
 		var w = parseInt(this.contentArray[imageNum][3]['lightbox_width']) || this.lightboxTemp.getWidth();//+(this.options.contentOffset.height);
@@ -450,7 +447,7 @@ Lightbox.prototype = {
 		embed = embed.gsub('#{width}',w)
 		embed = embed.gsub('#{height}',h)
 		this.lightboxContent.innerHTML = embed;	
-		console.log(embed)
+		
 		this.resizeContentContainer( w,h );
 	},
 	
@@ -461,7 +458,7 @@ Lightbox.prototype = {
 	buildSourceString : function(imageNum){
 		var ss = "";
 		ss += this.singleSourceString(this.contentArray[imageNum][0]);
-		console.log(this.contentArray[imageNum][3]);
+		
 		var sources = this.contentArray[imageNum][3].alt_src.split(',');
 		sources.each(function(src){
 				ss +=  this.singleSourceString(src);
@@ -486,8 +483,7 @@ Lightbox.prototype = {
 	//  Hide most elements and load content from an inline element
 	//  
 	changeInline: function(imageNum){
-		console.log(this.getAnchor(this.contentArray[imageNum][0]));
-		console.log( $(this.getAnchor(this.contentArray[imageNum][0])) );
+
 		this.lightboxTemp.innerHTML = $(this.getAnchor(this.contentArray[imageNum][0])).innerHTML;
 		var w = parseInt(this.contentArray[imageNum][3]['lightbox_width']) || this.lightboxTemp.getWidth();//+(this.options.contentOffset.height);
 		var h = parseInt(this.contentArray[imageNum][3]['lightbox_height']) || this.lightboxTemp.getHeight();//+(this.options.contentOffset.width);
@@ -575,7 +571,7 @@ Lightbox.prototype = {
     //  resizeContentContainer()
     //
     resizeContentContainer: function(imgWidth, imgHeight) {
-		console.log(imgWidth + " X " + imgHeight)
+	
 
         // get current width and height
         var widthCurrent  = this.outerContentContainer.getWidth();
@@ -592,7 +588,7 @@ Lightbox.prototype = {
         // calculate size difference between new and old image, and resize if necessary
         var wDiff = widthCurrent - widthNew;
         var hDiff = heightCurrent - heightNew;
-		console.log(widthNew + " X " + heightNew)
+
         //if (hDiff != 0) new Effect.Scale(this.outerContentContainer, yScale, {scaleX: false, duration: this.resizeDuration, queue: 'front'}); 
         //if (wDiff != 0) new Effect.Scale(this.outerContentContainer, xScale, {scaleY: false, duration: this.resizeDuration, delay: this.resizeDuration}); 
 
