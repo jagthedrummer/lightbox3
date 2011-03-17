@@ -243,7 +243,7 @@ Lightbox.prototype = {
       					  Builder.node('img',{id:'lightboxImage'}),
                   Builder.node('div',{id:'loading'}, 
                       Builder.node('a',{id:'loadingLink', href: '#', 'class':'lb' }, 
-                          Builder.node('img', {src: LightboxOptions.fileLoadingImage})
+                          []//Builder.node('img', {src: LightboxOptions.fileLoadingImage})
                       )
                   )
                 ]) //contentContainer
