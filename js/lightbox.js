@@ -72,7 +72,7 @@ LightboxOptions = Object.extend({
     resizeSpeed: 9,        // controls the speed of the image resizing animations (1=slowest and 10=fastest)
 
     borderSize: 10,         //if you adjust the padding in the CSS, you will need to update this variable
-
+  evalScripts : true,       // by default evaluate the scripts that come with Ajax requests
 	// When grouping images this is used to write: Image # of #.
 	// Change it for non-english localization
 	labelImage: "Image",
@@ -506,7 +506,7 @@ Lightbox.prototype = {
 	//  Hide most elements and load content into an iframe
 	//  
 	changePage: function(imageNum){
-		
+
 		//this.lightboxImage.src = "";
 		var newAJAX = new Ajax.Request(
 				this.contentArray[this.activeContent][0], {
@@ -514,11 +514,16 @@ Lightbox.prototype = {
 					parameters: '', 
 					onComplete: function(response) {
 						this.lightboxTemp.innerHTML = response.responseText;
+						
 						//var layout =  this.lightboxContent.getLayout();
 						//layout.get('width'),layout.get('height') 
 						var w = parseInt(this.contentArray[imageNum][3]['lightbox_width']) || this.lightboxTemp.getWidth();//+(this.options.contentOffset.height);
 						var h = parseInt(this.contentArray[imageNum][3]['lightbox_height']) || this.lightboxTemp.getHeight();//+(this.options.contentOffset.width);
 						this.lightboxContent.innerHTML =  response.responseText;
+						
+						if(LightboxOptions.evalScripts){
+						  response.responseText.evalScripts();
+						}
 						this.resizeContentContainer( w,h );
 						//this._processWindow();
 					}.bind(this)
