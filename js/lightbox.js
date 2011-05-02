@@ -588,7 +588,7 @@ Lightbox.prototype = {
         //if (hDiff != 0) new Effect.Scale(this.outerContentContainer, yScale, {scaleX: false, duration: this.resizeDuration, queue: 'front'}); 
         //if (wDiff != 0) new Effect.Scale(this.outerContentContainer, xScale, {scaleY: false, duration: this.resizeDuration, delay: this.resizeDuration}); 
 
-		if( (hDiff != 0) && (wDiff != 0) ){
+		if( (hDiff != 0) || (wDiff != 0) ){
 			
 			new Effect.Morph(this.outerContentContainer,{
 				style : { 'width' : widthNew + "px", 'height' : heightNew + "px"},
