@@ -964,7 +964,7 @@ Lightbox.prototype = {
 			newUrl += '&autoplay=1&playerType=embedded&playlist=false';
 		} 
 		return newUrl;
-	},
+	}
 }
 
 document.observe('dom:loaded', function () { new Lightbox(); });
